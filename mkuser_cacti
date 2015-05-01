@@ -1,0 +1,23 @@
+#!/bin/bash
+
+IP=$1
+WORKDIR="/home/andrey/Private/GNS/scripts"
+
+if ! [[ $IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]] ; then     # validate user input to IP address
+
+        echo "Requires a valid IP address as an argument"
+        exit
+
+fi
+
+echo ${IP}
+/usr/bin/ssh root@${IP} useradd -m -s /bin/bash cacti
+/usr/bin/ssh root@${IP} mkdir -pv /home/cacti/.ssh
+/usr/bin/scp ${WORKDIR}/authorized_keys root@${IP}:/home/cacti/.ssh/
+/usr/bin/ssh root@${IP} chown cacti:cacti -Rv /home/cacti/
+
+/usr/bin/scp ${WORKDIR}/nfs_client.sh root@${IP}:/usr/local/bin/
+
+# Install some needs
+yum -y install sysstat net-snmp-perl.x86_64 net-snmp-utils.x86_64
+apt-get -y install sysstat
